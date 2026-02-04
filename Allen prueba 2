@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🎟️ Raspa y Gana</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f6fa;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .wallet {
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .tickets {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .ticket {
+      padding: 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #2ecc71;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .ticket.occupied {
+      background: #e74c3c;
+      cursor: not-allowed;
+    }
+
+    .panel {
+      margin-top: 25px;
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      background: black;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    input {
+      padding: 10px;
+      width: 80%;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid gray;
+    }
+
+    .winner {
+      font-size: 22px;
+      margin-top: 20px;
+      font-weight: bold;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎟️ Raspa y Gana (50 Cupones)</h1>
+<p>Compra un cupón por <b>2 USDT</b> y participa por <b>200 USDT</b></p>
+
+<div class="wallet">
+  Wallet de pago (demo): <br>
+  <span>0x123456789FAKEWALLET</span>
+</div>
+
+<div class="tickets" id="tickets"></div>
+
+<div class="panel">
+  <h2>📋 Participantes</h2>
+  <ul id="players"></ul>
+</div>
+
+<div class="panel">
+  <h2>🎲 Panel Admin</h2>
+  <button onclick="launchDraw()">Lanzar Sorteo</button>
+  <div class="winner" id="winner"></div>
+</div>
+
+<script>
+  let tickets = JSON.parse(localStorage.getItem("tickets")) || Array(50).fill(null);
+  let winnerIndex = localStorage.getItem("winnerIndex");
+
+  // Elegir ganador al azar solo la primera vez
+  if (winnerIndex === null) {
+    winnerIndex = Math.floor(Math.random() * 50);
+    localStorage.setItem("winnerIndex", winnerIndex);
+  }
+
+  function renderTickets() {
+    const container = document.getElementById("tickets");
+    container.innerHTML = "";
+
+    tickets.forEach((player, i) => {
+      const div = document.createElement("div");
+      div.className = "ticket";
+
+      if (player) {
+        div.classList.add("occupied");
+        div.innerHTML = `Cupón ${i+1}<br>👤 ${player}`;
+      } else {
+        div.innerHTML = `Cupón ${i+1}<br>Disponible`;
+        div.onclick = () => buyTicket(i);
+      }
+
+      container.appendChild(div);
+    });
+
+    renderPlayers();
+  }
+
+  function buyTicket(index) {
+    const name = prompt("Escribe tu nombre o alias:");
+    if (!name) return;
+
+    tickets[index] = name;
+    localStorage.setItem("tickets", JSON.stringify(tickets));
+    renderTickets();
+  }
+
+  function renderPlayers() {
+    const list = document.getElementById("players");
+    list.innerHTML = "";
+
+    tickets.forEach((player, i) => {
+      if (player) {
+        const li = document.createElement("li");
+        li.textContent = `Cupón ${i+1} → ${player}`;
+        list.appendChild(li);
+      }
+    });
+  }
+
+  function launchDraw() {
+    const winner = tickets[winnerIndex];
+
+    if (!winner) {
+      alert("⚠️ El cupón ganador aún no ha sido comprado.");
+      return;
+    }
+
+    document.getElementById("winner").innerHTML =
+      `🎉 GANADOR: ${winner}<br>💰 Has ganado 200 USDT`;
+  }
+
+  renderTickets();
+</script>
+
+</body>
+</html>
